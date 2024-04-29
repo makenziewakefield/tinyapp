@@ -9,6 +9,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+app.use(express.urlencoded({ extended: true }));
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</></body></html>\n");
 });

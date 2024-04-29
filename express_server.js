@@ -61,10 +61,6 @@ app.post("/urls", (req, res) => {
   let generatedID = generateRandomString();
   let longURL = req.body.longURL;
   urlDatabase[generatedID] = longURL;
-
-  console.log(req.body);
-  console.log(`Added URL: ${longURL} with ID: ${generatedID}`);
-  
   res.redirect(`/urls/${generatedID}`)
 });
 

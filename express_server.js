@@ -22,7 +22,12 @@ app.listen(PORT, () => {
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
+
+  if (longURL) {
     res.redirect(longURL);
+  } else {
+    res.status(404).send("URL not found");
+  }
 });
 
 app.get("/urls.json", (req, res) => {

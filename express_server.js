@@ -13,6 +13,7 @@ const urlDatabase = {
 // Middleware to parse URL encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
+// Cookie parser middleware
 app.use(cookieParser());
 
 app.get("/hello", (req, res) => {

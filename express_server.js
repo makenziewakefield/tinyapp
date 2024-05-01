@@ -85,6 +85,12 @@ app.post("/urls/:id/delete", (req, res) => {
   } else {
     res.status(404).send("URL not found");
   }
+});
+
+// POST route to handle requests to login
+app.post("/login", (req, res) => {
+  const { username } = req.body;
+  res.redirect("/urls");
 })
 
 // Function to generate a random 6-character string for short URLs

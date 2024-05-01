@@ -99,6 +99,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 })
 
+// POST route to handle logout
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.redirect("/urls");
+})
+
 // Function to generate a random 6-character string for short URLs
 const generateRandomString = () => {
   let result = '';

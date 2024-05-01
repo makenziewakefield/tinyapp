@@ -89,7 +89,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // POST route to handle requests to login
 app.post("/login", (req, res) => {
-  const { username } = req.body;
+  res.cookie('username', username);
   res.redirect("/urls");
 })
 

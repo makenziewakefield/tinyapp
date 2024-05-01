@@ -64,6 +64,19 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${generatedID}`)
 });
 
+// POST route to update a URL
+app.post("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  const newLongURL = req.body.newLongURL;
+  if (urlDatabase[id]) {
+    urlDatabase[id] = newLongURL;
+    res.redirect("/urls");
+  } else {
+    req.status(404).send("URL not found")
+  }
+});
+
+// POST route to delete URL
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   if (urlDatabase[id]) {

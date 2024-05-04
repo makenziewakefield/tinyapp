@@ -61,6 +61,11 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// Render registration template
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
 // Handle form submission to add a new URL to the database
 app.post("/urls", (req, res) => {
   let generatedID = generateRandomString();

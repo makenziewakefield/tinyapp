@@ -60,19 +60,26 @@ app.get("/urls.json", (req, res) => {
 
 // Render the URLs index page with template variables
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_index", templateVars);
 });
 
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies.username };
+  const templateVars = { username: users[req.cookies.user_id] };
   res.render("urls_new", templateVars);
 });
 
 // Render the show URL page with template variables
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    user : users[req.cookies.user_id]
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -148,7 +155,7 @@ app.post("/register", (req, res) => {
     password
   };
 
-  user[userID] = newUser;
+  users[userID] = newUser;
 
   res.cookie("user_id", userID);
   res.redirect("/urls");

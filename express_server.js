@@ -10,6 +10,21 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+// Global object to store users
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
+
 // Middleware to parse URL encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
@@ -107,6 +122,35 @@ app.post("/login", (req, res) => {
 // POST route to handle logout
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
+  res.redirect("/urls");
+})
+
+// POST route to handle user registration
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400).send("Please provdie email and password");
+    return;
+  };
+
+  for (let existingUserID in users) {
+    if (users[existingUserID].email === email) {
+      res.status(400).send("Email alrady exists");
+      return;
+    }
+  };
+
+  const newUser = {
+    id: userID,
+    email,
+    password
+  };
+
+  user[userID] = newUser;
+
+  res.cookie("user_id", userID);
   res.redirect("/urls");
 })
 

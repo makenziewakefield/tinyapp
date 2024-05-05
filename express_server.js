@@ -130,17 +130,26 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect("/urls");
-})
+});
+
+const isEmailValid = (email, users) => {
+  for (let userID in users) {
+    if (users[userID].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
 
 // POST route to handle user registration
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    res.status(400).send("Please provdie email and password");
+  if (isEmailValid(email, users)) {
+    res.status(400).send("Email is already registered");
     return;
-  };
+  }
 
   for (let existingUserID in users) {
     if (users[existingUserID].email === email) {
@@ -159,7 +168,7 @@ app.post("/register", (req, res) => {
 
   res.cookie("user_id", userID);
   res.redirect("/urls");
-})
+});
 
 // Function to generate a random 6-character string for short URLs
 const generateRandomString = () => {

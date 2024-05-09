@@ -69,7 +69,10 @@ app.get("/urls", (req, res) => {
 
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: users[req.cookies.user_id] };
+  const templateVars = { 
+    username: users[req.cookies.user_id],
+    user: users[req.cookies.user_id]
+  };
   res.render("urls_new", templateVars);
 });
 

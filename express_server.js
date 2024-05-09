@@ -88,12 +88,18 @@ app.get("/urls/:id", (req, res) => {
 
 // Render registration template
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = {
+    user: req.user
+  }
+  res.render("register", templateVars);
 });
 
 // Render the login form
 app.get("/login", (req, res) => {
-  res.render("login");
+  const templateVars = {
+    user: req.user
+  };
+  res.render("login", templateVars);
 });
 
 // Handle form submission to add a new URL to the database
@@ -129,24 +135,30 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // POST route to handle requests to login
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect("/urls");
-})
+  const { email, password } = req.body;
+  const user = isEmailValid(email, users);
+
+  if (user && user.password === password) {
+    res.cookie("user_id", user.id);
+    res.redirect("/urls");
+  } else {
+    res.status(403).send("Invalid email or password")
+  }
+});
 
 // POST route to handle logout
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
-  res.redirect("/urls");
+  res.clearCookie("user_id");
+  res.redirect("/login");
 });
 
 const isEmailValid = (email, users) => {
   for (let userID in users) {
     if (users[userID].email === email) {
-      return true;
+      return users[userID];
     }
   }
-  return false;
+  return null;
 };
 
 // POST route to handle user registration

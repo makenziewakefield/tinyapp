@@ -24,17 +24,16 @@ const users = {
   }
 };
 
+//////////////////////////////////////////////
+/////////////// MIDDLEWARE ///////////////////
+//////////////////////////////////////////////
 
-// Middleware to parse URL encoded bodies
 app.use(express.urlencoded({ extended: true }));
-
-// Cookie parser middleware
 app.use(cookieParser());
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+//////////////////////////////////////////////
+/////////////// ROUTE HANDLERS ///////////////
+//////////////////////////////////////////////
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
@@ -132,7 +131,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST route to handle requests to login
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const user = isEmailValid(email, users);
+  const user = findUserbyEmail(email, users);
 
   if (user && user.password === password) {
     res.cookie("user_id", user.id);
@@ -148,7 +147,31 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-const isEmailValid = (email, users) => {
+// POST route to handle user registration
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  const { email, password } = req.body;
+
+  if (findUserbyEmail(email, users)) {
+    res.status(400).send("Email is already registered");
+    return;
+  }
+  const newUser = {
+    id: userID,
+    email,
+    password
+  };
+  users[userID] = newUser;
+
+  res.cookie("user_id", userID);
+  res.redirect("/urls");
+});
+
+/////////////////////////////////////////////////
+////////////// HELPER FUNCTIONS /////////////////
+/////////////////////////////////////////////////
+
+const findUserbyEmail = (email, users) => {
   for (let userID in users) {
     if (users[userID].email === email) {
       return users[userID];
@@ -156,35 +179,6 @@ const isEmailValid = (email, users) => {
   }
   return null;
 };
-
-// POST route to handle user registration
-app.post("/register", (req, res) => {
-  const userID = generateRandomString();
-  const { email, password } = req.body;
-
-  if (isEmailValid(email, users)) {
-    res.status(400).send("Email is already registered");
-    return;
-  }
-
-  for (let existingUserID in users) {
-    if (users[existingUserID].email === email) {
-      res.status(400).send("Email alrady exists");
-      return;
-    }
-  };
-
-  const newUser = {
-    id: userID,
-    email,
-    password
-  };
-
-  users[userID] = newUser;
-
-  res.cookie("user_id", userID);
-  res.redirect("/urls");
-});
 
 // Function to generate a random 6-character string for short URLs
 const generateRandomString = () => {
@@ -196,3 +190,11 @@ const generateRandomString = () => {
   }
   return result;
 };
+
+//////////////////////////////////////////////
+/////////// SERVER INITIALIZATION ////////////
+//////////////////////////////////////////////
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});

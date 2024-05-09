@@ -31,10 +31,6 @@ app.use(express.urlencoded({ extended: true }));
 // Cookie parser middleware
 app.use(cookieParser());
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</></body></html>\n");
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

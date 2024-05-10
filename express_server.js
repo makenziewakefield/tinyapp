@@ -181,23 +181,47 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   const newLongURL = req.body.newLongURL;
-  if (urlDatabase[id]) {
-    urlDatabase[id].longURL = newLongURL;
-    res.redirect("/urls");
-  } else {
-    res.status(404).send("URL not found")
+
+  if (!urlDatabase[id]) {
+    res.status(404).send("URL not found");
+    return;
   }
+
+  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+    res.status(401).send("You need to be logged in to edit URLs.");
+    return;
+  }
+
+  if (urlDatabase[id].userID !== req.cookies.user_id) {
+    res.status(403).send("You do not have permission to edit this URL.");
+    return;
+  }
+
+  urlDatabase[id].longURL = newLongURL;
+  res.redirect("/urls");
 });
 
 // POST route to delete URL
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  if (urlDatabase[id]) {
-    delete urlDatabase[id];
-    res.redirect("/urls");
-  } else {
+
+  if (!urlDatabase[id]) {
     res.status(404).send("URL not found");
+    return;
   }
+
+  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+    res.status(401).send("You need to be logged in to delete URLs.");
+    return;
+  }
+
+  if (urlDatabase[id].userID !== req.cookies.user_id) {
+    res.status(403).send("You do not have permission to delete this URL.");
+    return;
+  }
+
+  delete urlDatabase[id];
+  res.redirect("/urls");
 });
 
 // POST route to handle requests to login

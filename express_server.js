@@ -71,6 +71,21 @@ app.get("/urls.json", (req, res) => {
 
 // Render the URLs index page with template variables
 app.get("/urls", (req, res) => {
+  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+    res.send(`
+      <html>
+        <head>
+          <title>Login Required</title>
+        </head>
+        <body>
+          <h1>Login Required</h1>
+          <p>You need to <a href="/login">log in</a> or <a href="/register">register</a> to view your URLs.</p>
+        </body>
+      </html>
+    `);
+    return;
+  }
+
   const urlsArray = Object.keys(urlDatabase).map(shortURL => {
     console.log("shortURL:", shortURL);
     console.log("longURL:", urlDatabase[shortURL].longURL);

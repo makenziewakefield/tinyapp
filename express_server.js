@@ -1,6 +1,6 @@
 const express = require("express");
-const app = express();
 const cookieParser = require('cookie-parser');
+const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
@@ -24,16 +24,16 @@ const users = {
   }
 };
 
-//////////////////////////////////////////////
-/////////////// MIDDLEWARE ///////////////////
-//////////////////////////////////////////////
+////////////////////////////////////////////////////////
+///////////////////// MIDDLEWARE ///////////////////////
+////////////////////////////////////////////////////////
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-//////////////////////////////////////////////
-/////////////// ROUTE HANDLERS ///////////////
-//////////////////////////////////////////////
+////////////////////////////////////////////////////////
+//////////////////// ROUTE HANDLERS ////////////////////
+////////////////////////////////////////////////////////
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
@@ -43,7 +43,17 @@ app.get("/u/:id", (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.status(404).send("URL not found");
+    res.status(404).send(`
+    <html>
+      <head>
+        <title>404 Not Found</title>
+      </head>
+      <body>
+        <h1>404 Not Found</h1>
+        <p>The requested URL does not exist.</p>
+      </body>
+    </html>
+  `);
   }
 
 });
@@ -65,7 +75,7 @@ app.get("/urls", (req, res) => {
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
-    username: users[req.cookies.user_id],
+    // username: users[req.cookies.user_id],
     user: users[req.cookies.user_id]
   };
   res.render("urls_new", templateVars);
@@ -83,30 +93,32 @@ app.get("/urls/:id", (req, res) => {
 
 // Render registration template
 app.get("/register", (req, res) => {
+  if (req.cookies.user_id && users[req.cookies.user_id]) {
+    res.redirect("/urls");
+  }
   const templateVars = {
     user: req.user
   }
-  if (req.cookies.user_id && users[req.cookies.user_id]) {
-    res.redirect("/urls");
-  } else {
-    res.render("register", templateVars);
-  }
+  res.render("register", templateVars);
 });
 
 // Render the login form
 app.get("/login", (req, res) => {
+  if (req.cookies.user_id && users[req.cookies.user_id]) {
+    return res.redirect("/urls");
+  }
   const templateVars = {
     user: req.user
   };
-  if (req.cookies.user_id && users[req.cookies.user_id]) {
-    res.redirect("/urls");
-  } else {
-    res.render("login", templateVars);
-  }
+  res.render("login", templateVars);
 });
 
 // Handle form submission to add a new URL to the database
 app.post("/urls", (req, res) => {
+  if (!req.user) {
+    res.status(401).send("You need to be logged in to create new URLs.");
+    return;
+  }
   let generatedID = generateRandomString();
   let longURL = req.body.longURL;
   urlDatabase[generatedID] = longURL;
@@ -142,6 +154,7 @@ app.post("/login", (req, res) => {
   const user = findUserbyEmail(email, users);
 
   if (user && user.password === password) {
+    req.user = user;
     res.cookie("user_id", user.id);
     res.redirect("/urls");
   } else {
@@ -175,9 +188,9 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-/////////////////////////////////////////////////
-////////////// HELPER FUNCTIONS /////////////////
-/////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////// HELPER FUNCTIONS /////////////////////
+//////////////////////////////////////////////////////////
 
 const findUserbyEmail = (email, users) => {
   for (let userID in users) {
@@ -199,9 +212,9 @@ const generateRandomString = () => {
   return result;
 };
 
-//////////////////////////////////////////////
-/////////// SERVER INITIALIZATION ////////////
-//////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+///////////////// SERVER INITIALIZATION /////////////////
+/////////////////////////////////////////////////////////
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

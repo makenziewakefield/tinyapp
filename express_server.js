@@ -126,19 +126,40 @@ app.get("/urls", (req, res) => {
 
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
+  const userID = req.cookies.user_id;
+
+  if (!userID || !users[userID]) {
+    return res.redirect("/login");
+  }
+
   const templateVars = {
-    // username: users[req.cookies.user_id],
-    user: users[req.cookies.user_id]
+    user: users[userID]
   };
   res.render("urls_new", templateVars);
 });
 
 // Render the show URL page with template variables
 app.get("/urls/:id", (req, res) => {
+  const userID = req.cookies.user_id;
+  const urlID = req.params.id;
+  const url = urlDatabase[urlID];
+
+  if (!userID || !users[userID]) {
+    return res.status(401).send("You need to be logged in to access this page.");
+  }
+
+  if (!url) {
+    return res.status(404).send("URL not found.");
+  }
+
+  if (url.userID !== userID) {
+    return res.status(403).send("You do not have permission to access this URL.");
+  }
+
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies.user_id]
+    id: urlID,
+    longURL: url.longURL,
+    user: users[userID]
   };
   res.render("urls_show", templateVars);
 });

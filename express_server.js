@@ -43,12 +43,25 @@ app.use(cookieParser());
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].longURL;
+  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+    res.status(401).send(`
+    <html>
+      <head>
+        <title>Unauthorized</title>
+      </head>
+      <body>
+        <h1>Unauthorized</h1>
+        <p>You need to <a href="/login">log in</a> to view this URL.</p>
+      </body>
+    </html>
+  `);
+  return;
+  }
 
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
+  const loggedInUserID = req.cookies.user_id;
+  const url = urlDatabase[req.params.id];
+
+  if (!url || url.userID !== loggedInUserID) {
     res.status(404).send(`
     <html>
       <head>
@@ -56,12 +69,20 @@ app.get("/u/:id", (req, res) => {
       </head>
       <body>
         <h1>404 Not Found</h1>
-        <p>The requested URL does not exist.</p>
+        <p>The requested URL does not exist or you do not have permission to view it.</p>
       </body>
     </html>
   `);
+  return;
   }
 
+  const templateVars = {
+    id: req.params.id,
+    longURL: url.longURL,
+    user: users[loggedInUserID]
+  }
+
+  res.render("urls_show", templateVars);
 });
 
 // Endpoint to return JSON representation to the urlDatabase
@@ -90,8 +111,6 @@ app.get("/urls", (req, res) => {
    const userURLs = urlsForUser(loggedInUserID);
 
   const urlsArray = Object.keys(urlDatabase).map(shortURL => {
-    console.log("shortURL:", shortURL);
-    console.log("longURL:", urlDatabase[shortURL].longURL);
     return {
       shortURL,
       longURL: urlDatabase[shortURL].longURL,

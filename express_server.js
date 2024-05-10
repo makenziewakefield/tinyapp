@@ -251,12 +251,16 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = findUserbyEmail(email, users);
 
-  if (user && user.password === password) {
+  if (!user) {
+    return res.status(403).send("Invalid email or password");
+  }
+
+  if (bcrypt.compareSync(password, user.password)) {
     req.user = user;
     res.cookie("user_id", user.id);
     res.redirect("/urls");
   } else {
-    res.status(403).send("Invalid email or password")
+    res.status(403).send("Invalid email or password");
   }
 });
 
@@ -283,7 +287,7 @@ app.post("/register", (req, res) => {
     email,
     password: hashedPassword
   };
-  
+
   users[userID] = newUser;
 
   res.cookie("user_id", userID);

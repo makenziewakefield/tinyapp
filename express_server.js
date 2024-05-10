@@ -86,6 +86,9 @@ app.get("/urls", (req, res) => {
     return;
   }
 
+   const loggedInUserID = req.cookies.user_id;
+   const userURLs = urlsForUser(loggedInUserID);
+
   const urlsArray = Object.keys(urlDatabase).map(shortURL => {
     console.log("shortURL:", shortURL);
     console.log("longURL:", urlDatabase[shortURL].longURL);
@@ -241,6 +244,16 @@ const generateRandomString = () => {
   }
   return result;
 };
+
+const urlsForUser = (id) => {
+  const userURLs = {};
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
+}
 
 /////////////////////////////////////////////////////////
 ///////////////// SERVER INITIALIZATION /////////////////

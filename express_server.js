@@ -86,7 +86,11 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: req.user
   }
-  res.render("register", templateVars);
+  if (req.cookies.user_id && users[req.cookies.user_id]) {
+    res.redirect("/urls");
+  } else {
+    res.render("register", templateVars);
+  }
 });
 
 // Render the login form
@@ -94,7 +98,11 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: req.user
   };
-  res.render("login", templateVars);
+  if (req.cookies.user_id && users[req.cookies.user_id]) {
+    res.redirect("/urls");
+  } else {
+    res.render("login", templateVars);
+  }
 });
 
 // Handle form submission to add a new URL to the database

@@ -6,8 +6,14 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 // Global object to store users
@@ -38,7 +44,7 @@ app.use(cookieParser());
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
 
   if (longURL) {
     res.redirect(longURL);
@@ -65,8 +71,17 @@ app.get("/urls.json", (req, res) => {
 
 // Render the URLs index page with template variables
 app.get("/urls", (req, res) => {
-  const templateVars = { 
-    urls: urlDatabase, 
+  const urlsArray = Object.keys(urlDatabase).map(shortURL => {
+    console.log("shortURL:", shortURL);
+    console.log("longURL:", urlDatabase[shortURL].longURL);
+    return {
+      shortURL,
+      longURL: urlDatabase[shortURL].longURL,
+      userID: urlDatabase[shortURL].userID
+    };
+  });
+  const templateVars = {
+    urls: urlsArray,
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
@@ -74,7 +89,7 @@ app.get("/urls", (req, res) => {
 
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     // username: users[req.cookies.user_id],
     user: users[req.cookies.user_id]
   };
@@ -84,9 +99,9 @@ app.get("/urls/new", (req, res) => {
 // Render the show URL page with template variables
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
-    user : users[req.cookies.user_id]
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id].longURL,
+    user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -121,7 +136,7 @@ app.post("/urls", (req, res) => {
   }
   let generatedID = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[generatedID] = longURL;
+  urlDatabase[generatedID] = { longURL, userID: req.user.id };
   res.redirect(`/urls/${generatedID}`)
 });
 
@@ -130,7 +145,7 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   const newLongURL = req.body.newLongURL;
   if (urlDatabase[id]) {
-    urlDatabase[id] = newLongURL;
+    urlDatabase[id].longURL = newLongURL;
     res.redirect("/urls");
   } else {
     res.status(404).send("URL not found")

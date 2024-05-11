@@ -52,7 +52,7 @@ app.use(cookieSession({
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
   if (!req.session.user_id || !users[req.session.user_id]) {
-    res.status(403).send(`
+    res.status(302).send(`
     <html>
       <head>
         <title>Unauthorized</title>
@@ -70,7 +70,7 @@ app.get("/u/:id", (req, res) => {
   const url = urlDatabase[req.params.id];
 
   if (!url || url.userID !== loggedInUserID) {
-    res.status(403).send(`
+    res.status(302).send(`
     <html>
       <head>
         <title>403 Not Found</title>
@@ -161,7 +161,7 @@ app.get("/urls/:id", (req, res) => {
   }
 
   if (!url) {
-    return res.status(403).send("URL not found.");
+    return res.status(404).send("URL not found.");
   }
 
   if (url.userID !== userID) {

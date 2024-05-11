@@ -93,10 +93,12 @@ app.get("/u/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 // Endpoint to return JSON representation to the urlDatabase
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
 
 // Render the URLs index page with template variables
 app.get("/urls", (req, res) => {
@@ -132,6 +134,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id;
@@ -145,6 +148,7 @@ app.get("/urls/new", (req, res) => {
   };
   res.render("urls_new", templateVars);
 });
+
 
 // Render the show URL page with template variables
 app.get("/urls/:id", (req, res) => {
@@ -172,6 +176,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 // Render registration template
 app.get("/register", (req, res) => {
   if (req.session.user_id && users[req.session.user_id]) {
@@ -182,6 +187,7 @@ app.get("/register", (req, res) => {
   }
   res.render("register", templateVars);
 });
+
 
 // Render the login form
 app.get("/login", (req, res) => {
@@ -194,6 +200,7 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+
 // Handle form submission to add a new URL to the database
 app.post("/urls", (req, res) => {
   if (!req.user) {
@@ -205,6 +212,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[generatedID] = { longURL, userID: req.user.id };
   res.redirect(`/urls/${generatedID}`)
 });
+
 
 // POST route to update a URL
 app.post("/urls/:id", (req, res) => {
@@ -230,6 +238,7 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+
 // POST route to delete URL
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
@@ -253,28 +262,29 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+
 // POST route to handle requests to login
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = getUserByEmail(email, users);
 
   if (!user) {
-    return res.status(403).send("Invalid email or password");
-  }
-
-  if (user && bcrypt.compareSync(password, user.password)) {
+    return res.status(403).send("User not found. Please register.");
+  } else if (bcrypt.compareSync(password, user.password)) {
     req.session.user_id = user.id;
     res.redirect("/urls");
   } else {
-    res.status(403).send("Invalid email or password");
+    res.status(403).send("Incorrect password. Please try again.");
   }
 });
+
 
 // POST route to handle logout
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");
 });
+
 
 // POST route to handle user registration
 app.post("/register", (req, res) => {

@@ -17,7 +17,7 @@ const generateRandomString = () => {
   return result;
 };
 
-const urlsForUser = (id) => {
+const urlsForUser = (id, urlDatabase) => {
   const userURLs = {};
   for (let shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === id) {

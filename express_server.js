@@ -39,6 +39,7 @@ const users = {
 ////////////////////////////////////////////////////////
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -51,7 +52,7 @@ app.use(cookieSession({
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
   if (!req.session.user_id || !users[req.session.user_id]) {
-    res.status(401).send(`
+    res.status(403).send(`
     <html>
       <head>
         <title>Unauthorized</title>
@@ -69,13 +70,13 @@ app.get("/u/:id", (req, res) => {
   const url = urlDatabase[req.params.id];
 
   if (!url || url.userID !== loggedInUserID) {
-    res.status(404).send(`
+    res.status(403).send(`
     <html>
       <head>
-        <title>404 Not Found</title>
+        <title>403 Not Found</title>
       </head>
       <body>
-        <h1>404 Not Found</h1>
+        <h1>403 Not Found</h1>
         <p>The requested URL does not exist or you do not have permission to view it.</p>
       </body>
     </html>
@@ -115,7 +116,7 @@ app.get("/urls", (req, res) => {
   }
 
    const loggedInUserID = req.session.user_id;
-   const userURLs = urlsForUser(loggedInUserID);
+   const userURLs = urlsForUser(loggedInUserID, urlDatabase);
 
   const urlsArray = Object.keys(urlDatabase).map(shortURL => {
     return {
@@ -152,11 +153,11 @@ app.get("/urls/:id", (req, res) => {
   const url = urlDatabase[urlID];
 
   if (!userID || !users[userID]) {
-    return res.status(401).send("You need to be logged in to access this page.");
+    return res.status(403).send("You need to be logged in to access this page.");
   }
 
   if (!url) {
-    return res.status(404).send("URL not found.");
+    return res.status(403).send("URL not found.");
   }
 
   if (url.userID !== userID) {
@@ -196,7 +197,7 @@ app.get("/login", (req, res) => {
 // Handle form submission to add a new URL to the database
 app.post("/urls", (req, res) => {
   if (!req.user) {
-    res.status(401).send("You need to be logged in to create new URLs.");
+    res.status(403).send("You need to be logged in to create new URLs.");
     return;
   }
   let generatedID = generateRandomString();
@@ -211,12 +212,12 @@ app.post("/urls/:id", (req, res) => {
   const newLongURL = req.body.newLongURL;
 
   if (!urlDatabase[id]) {
-    res.status(404).send("URL not found");
+    res.status(403).send("URL not found");
     return;
   }
 
   if (!req.session.user_id || !users[req.session.user_id]) {
-    res.status(401).send("You need to be logged in to edit URLs.");
+    res.status(403).send("You need to be logged in to edit URLs.");
     return;
   }
 
@@ -234,12 +235,12 @@ app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
 
   if (!urlDatabase[id]) {
-    res.status(404).send("URL not found");
+    res.status(403).send("URL not found");
     return;
   }
 
   if (!req.session.user_id || !users[req.session.user_id]) {
-    res.status(401).send("You need to be logged in to delete URLs.");
+    res.status(403).send("You need to be logged in to delete URLs.");
     return;
   }
 
@@ -261,8 +262,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid email or password");
   }
 
-  if (bcrypt.compareSync(password, user.password)) {
-    req.user = user;
+  if (user && bcrypt.compareSync(password, user.password)) {
     req.session.user_id = user.id;
     res.redirect("/urls");
   } else {
@@ -272,7 +272,7 @@ app.post("/login", (req, res) => {
 
 // POST route to handle logout
 app.post("/logout", (req, res) => {
-  req.session['user_id'] = null;
+  req.session = null;
   res.redirect("/login");
 });
 

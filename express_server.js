@@ -48,7 +48,7 @@ app.use(cookieSession({
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
-  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     res.status(401).send(`
     <html>
       <head>
@@ -63,7 +63,7 @@ app.get("/u/:id", (req, res) => {
   return;
   }
 
-  const loggedInUserID = req.cookies.user_id;
+  const loggedInUserID = req.session.user_id;
   const url = urlDatabase[req.params.id];
 
   if (!url || url.userID !== loggedInUserID) {
@@ -97,7 +97,7 @@ app.get("/urls.json", (req, res) => {
 
 // Render the URLs index page with template variables
 app.get("/urls", (req, res) => {
-  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     res.send(`
       <html>
         <head>
@@ -112,7 +112,7 @@ app.get("/urls", (req, res) => {
     return;
   }
 
-   const loggedInUserID = req.cookies.user_id;
+   const loggedInUserID = req.session.user_id;
    const userURLs = urlsForUser(loggedInUserID);
 
   const urlsArray = Object.keys(urlDatabase).map(shortURL => {
@@ -124,14 +124,14 @@ app.get("/urls", (req, res) => {
   });
   const templateVars = {
     urls: urlsArray,
-    user: users[req.cookies["user_id"]]
+    user: users[req.session["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
 
 // Render the new URL form page
 app.get("/urls/new", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
 
   if (!userID || !users[userID]) {
     return res.redirect("/login");
@@ -145,7 +145,7 @@ app.get("/urls/new", (req, res) => {
 
 // Render the show URL page with template variables
 app.get("/urls/:id", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const urlID = req.params.id;
   const url = urlDatabase[urlID];
 
@@ -171,7 +171,7 @@ app.get("/urls/:id", (req, res) => {
 
 // Render registration template
 app.get("/register", (req, res) => {
-  if (req.cookies.user_id && users[req.cookies.user_id]) {
+  if (req.session.user_id && users[req.session.user_id]) {
     res.redirect("/urls");
   }
   const templateVars = {
@@ -182,7 +182,7 @@ app.get("/register", (req, res) => {
 
 // Render the login form
 app.get("/login", (req, res) => {
-  if (req.cookies.user_id && users[req.cookies.user_id]) {
+  if (req.session.user_id && users[req.session.user_id]) {
     return res.redirect("/urls");
   }
   const templateVars = {
@@ -213,12 +213,12 @@ app.post("/urls/:id", (req, res) => {
     return;
   }
 
-  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     res.status(401).send("You need to be logged in to edit URLs.");
     return;
   }
 
-  if (urlDatabase[id].userID !== req.cookies.user_id) {
+  if (urlDatabase[id].userID !== req.session.user_id) {
     res.status(403).send("You do not have permission to edit this URL.");
     return;
   }
@@ -236,12 +236,12 @@ app.post("/urls/:id/delete", (req, res) => {
     return;
   }
 
-  if (!req.cookies.user_id || !users[req.cookies.user_id]) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     res.status(401).send("You need to be logged in to delete URLs.");
     return;
   }
 
-  if (urlDatabase[id].userID !== req.cookies.user_id) {
+  if (urlDatabase[id].userID !== req.session.user_id) {
     res.status(403).send("You do not have permission to delete this URL.");
     return;
   }
@@ -261,7 +261,7 @@ app.post("/login", (req, res) => {
 
   if (bcrypt.compareSync(password, user.password)) {
     req.user = user;
-    res.cookie("user_id", user.id);
+    req.session.user_id = user.id;
     res.redirect("/urls");
   } else {
     res.status(403).send("Invalid email or password");
@@ -294,7 +294,7 @@ app.post("/register", (req, res) => {
 
   users[userID] = newUser;
 
-  res.cookie("user_id", userID);
+  req.session.user_id = userID;
   res.redirect("/urls");
 });
 

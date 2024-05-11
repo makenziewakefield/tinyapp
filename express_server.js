@@ -1,3 +1,5 @@
+const { findUserbyEmail, generateRandomString, urlsForUser } = require("./helpers");
+
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
@@ -297,40 +299,6 @@ app.post("/register", (req, res) => {
   req.session.user_id = userID;
   res.redirect("/urls");
 });
-
-//////////////////////////////////////////////////////////
-/////////////////// HELPER FUNCTIONS /////////////////////
-//////////////////////////////////////////////////////////
-
-const findUserbyEmail = (email, users) => {
-  for (let userID in users) {
-    if (users[userID].email === email) {
-      return users[userID];
-    }
-  }
-  return null;
-};
-
-// Function to generate a random 6-character string for short URLs
-const generateRandomString = () => {
-  let result = '';
-  const characters = 'abcdefghijklmnopqrstuvwxyz';
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters.charAt(randomIndex);
-  }
-  return result;
-};
-
-const urlsForUser = (id) => {
-  const userURLs = {};
-  for (let shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return userURLs;
-};
 
 /////////////////////////////////////////////////////////
 ///////////////// SERVER INITIALIZATION /////////////////

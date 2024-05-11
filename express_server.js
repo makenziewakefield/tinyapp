@@ -1,4 +1,4 @@
-const { findUserbyEmail, generateRandomString, urlsForUser } = require("./helpers");
+const { getUserByEmail, generateRandomString, urlsForUser, } = require("./helpers");
 
 const express = require("express");
 const cookieSession = require('cookie-session');
@@ -255,7 +255,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST route to handle requests to login
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const user = findUserbyEmail(email, users);
+  const user = getUserByEmail(email, users);
 
   if (!user) {
     return res.status(403).send("Invalid email or password");
@@ -281,7 +281,7 @@ app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const { email, password } = req.body;
 
-  if (findUserbyEmail(email, users)) {
+  if (getUserByEmail(email, users)) {
     res.status(400).send("Email is already registered");
     return;
   }

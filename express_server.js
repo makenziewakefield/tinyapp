@@ -73,10 +73,10 @@ app.get("/u/:id", (req, res) => {
     res.status(403).send(`
     <html>
       <head>
-        <title>403 Not Found</title>
+        <title>Not Found</title>
       </head>
       <body>
-        <h1>403 Not Found</h1>
+        <h1>Not Found</h1>
         <p>The requested URL does not exist or you do not have permission to view it.</p>
       </body>
     </html>

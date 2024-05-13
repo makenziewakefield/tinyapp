@@ -76,6 +76,16 @@ app.get("/urls.json", (req, res) => {
 });
 
 
+// Redirect useres based on authentication status when first visiting the website
+app.get("/", (req, res) => {
+  if (req.session.user_id && users[req.session.user_id]) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
+});
+
+
 // Render the URLs index page with template variables
 app.get("/urls", (req, res) => {
   if (!req.session.user_id || !users[req.session.user_id]) {

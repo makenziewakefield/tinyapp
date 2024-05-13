@@ -25,24 +25,61 @@ app.use(cookieSession({
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  if (!req.session.user_id || !users[req.session.user_id]) {
+    res.status(403).send(`
+    <html>
+      <head>
+        <title>Unauthorized</title>
+      </head>
+      <body>
+        <h1>Unauthorized</h1>
+        <p>You need to <a href="/login">log in</a> to view this URL.</p>
+      </body>
+    </html>
+  `);
+  return;
+  }
 
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
-    res.status(404).send(`
+  const loggedInUserID = req.session.user_id;
+  const url = urlDatabase[req.params.id];
+
+  if (!url || url.userID !== loggedInUserID) {
+    res.status(403).send(`
     <html>
       <head>
         <title>Not Found</title>
       </head>
       <body>
-        <h1>404 Not Found</h1>
-        <p>The requested short URL does not exist.</p>
+        <h1>Not Found</h1>
+        <p>The requested URL does not exist or you do not have permission to view it.</p>
       </body>
     </html>
   `);
+  return;
   }
+
+  const templateVars = {
+    id: req.params.id,
+    longURL: url.longURL,
+    user: users[loggedInUserID]
+  }
+
+  if (templateVars.longURL) {
+    res.redirect(templateVars.longURL);
+    return;
+  }
+
+  res.status(404).send(`
+    <html>
+      <head>
+        <title>Not Found</title>
+      </head>
+      <body>
+        <h1>Not Found</h1>
+        <p>The requested short URL does not have a corresponding long URL.</p>
+      </body>
+    </html>
+  `);
 });
 
 

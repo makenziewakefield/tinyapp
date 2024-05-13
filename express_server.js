@@ -106,13 +106,14 @@ app.get("/urls", (req, res) => {
    const loggedInUserID = req.session.user_id;
    const userURLs = urlsForUser(loggedInUserID, urlDatabase);
 
-  const urlsArray = Object.keys(urlDatabase).map(shortURL => {
+  const urlsArray = Object.keys(userURLs).map(shortURL => {
     return {
       shortURL,
       longURL: urlDatabase[shortURL].longURL,
       userID: urlDatabase[shortURL].userID
     };
   });
+
   const templateVars = {
     urls: urlsArray,
     user: users[req.session["user_id"]]

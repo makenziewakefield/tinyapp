@@ -4,10 +4,8 @@ const { urlDatabase, users } = require("./database")
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
-
 const app = express();
-const PORT = 8080; // default port 8080
-
+const PORT = 8080;
 app.set("view engine", "ejs");
 
 ////////////////////////////////////////////////////////
@@ -27,46 +25,24 @@ app.use(cookieSession({
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
-  if (!req.session.user_id || !users[req.session.user_id]) {
-    res.status(403).send(`
-    <html>
-      <head>
-        <title>Unauthorized</title>
-      </head>
-      <body>
-        <h1>Unauthorized</h1>
-        <p>You need to <a href="/login">log in</a> to view this URL.</p>
-      </body>
-    </html>
-  `);
-  return;
-  }
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
 
-  const loggedInUserID = req.session.user_id;
-  const url = urlDatabase[req.params.id];
-
-  if (!url || url.userID !== loggedInUserID) {
-    res.status(403).send(`
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send(`
     <html>
       <head>
         <title>Not Found</title>
       </head>
       <body>
-        <h1>Not Found</h1>
-        <p>The requested URL does not exist or you do not have permission to view it.</p>
+        <h1>404 Not Found</h1>
+        <p>The requested short URL does not exist.</p>
       </body>
     </html>
   `);
-  return;
   }
-
-  const templateVars = {
-    id: req.params.id,
-    longURL: url.longURL,
-    user: users[loggedInUserID]
-  }
-
-  res.render("urls_show", templateVars);
 });
 
 

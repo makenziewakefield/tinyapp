@@ -1,4 +1,5 @@
 const { getUserByEmail, generateRandomString, urlsForUser, } = require("./helpers");
+const { urlDatabase, users } = require("./database")
 
 const express = require("express");
 const cookieSession = require('cookie-session');
@@ -8,31 +9,6 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-
-// Global object to store users
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
 
 ////////////////////////////////////////////////////////
 ///////////////////// MIDDLEWARE ///////////////////////

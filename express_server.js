@@ -189,13 +189,13 @@ app.get("/login", (req, res) => {
 
 // Handle form submission to add a new URL to the database
 app.post("/urls", (req, res) => {
-  if (!req.user) {
+  if (!req.session.user_id || !users[req.session.user_id]) {
     res.status(403).send("You need to be logged in to create new URLs.");
     return;
   }
   let generatedID = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[generatedID] = { longURL, userID: req.user.id };
+  urlDatabase[generatedID] = { longURL, userID: req.session.user_id };
   res.redirect(`/urls/${generatedID}`)
 });
 

@@ -1,3 +1,4 @@
+// Function to retrieve a user object by email from database of users
 const getUserByEmail = (email, users) => {
   for (let userID in users) {
     if (users[userID].email === email) {
@@ -7,6 +8,7 @@ const getUserByEmail = (email, users) => {
   return undefined;
 };
 
+// Function to generate a random string of 6 characters
 const generateRandomString = () => {
   let result = '';
   const characters = 'abcdefghijklmnopqrstuvwxyz';
@@ -17,6 +19,7 @@ const generateRandomString = () => {
   return result;
 };
 
+// Function to retrieve URLs associated with a specific user ID from URL database
 const urlsForUser = (id, urlDatabase) => {
   const userURLs = {};
   for (let shortURL in urlDatabase) {

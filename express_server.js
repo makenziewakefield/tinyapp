@@ -1,5 +1,5 @@
 const { getUserByEmail, generateRandomString, urlsForUser, } = require("./helpers");
-const { urlDatabase, users } = require("./database")
+const { urlDatabase, users } = require("./database");
 
 const express = require("express");
 const cookieSession = require('cookie-session');
@@ -25,25 +25,11 @@ app.use(cookieSession({
 
 // Redirect short URLs to their corresponding long URLs
 app.get("/u/:id", (req, res) => {
-  if (!req.session.user_id || !users[req.session.user_id]) {
-    res.status(403).send(`
-    <html>
-      <head>
-        <title>Unauthorized</title>
-      </head>
-      <body>
-        <h1>Unauthorized</h1>
-        <p>You need to <a href="/login">log in</a> to view this URL.</p>
-      </body>
-    </html>
-  `);
-  return;
-  }
 
   const loggedInUserID = req.session.user_id;
   const url = urlDatabase[req.params.id];
 
-  if (!url || url.userID !== loggedInUserID) {
+  if (!url) {
     res.status(403).send(`
     <html>
       <head>
@@ -51,7 +37,7 @@ app.get("/u/:id", (req, res) => {
       </head>
       <body>
         <h1>Not Found</h1>
-        <p>The requested URL does not exist or you do not have permission to view it.</p>
+        <p>The requested URL does not exist.</p>
       </body>
     </html>
   `);
@@ -62,24 +48,9 @@ app.get("/u/:id", (req, res) => {
     id: req.params.id,
     longURL: url.longURL,
     user: users[loggedInUserID]
-  }
+  };
 
-  if (templateVars.longURL) {
-    res.redirect(templateVars.longURL);
-    return;
-  }
-
-  res.status(404).send(`
-    <html>
-      <head>
-        <title>Not Found</title>
-      </head>
-      <body>
-        <h1>Not Found</h1>
-        <p>The requested short URL does not have a corresponding long URL.</p>
-      </body>
-    </html>
-  `);
+  res.redirect(templateVars.longURL);
 });
 
 
@@ -116,8 +87,8 @@ app.get("/urls", (req, res) => {
     return;
   }
 
-   const loggedInUserID = req.session.user_id;
-   const userURLs = urlsForUser(loggedInUserID, urlDatabase);
+  const loggedInUserID = req.session.user_id;
+  const userURLs = urlsForUser(loggedInUserID, urlDatabase);
 
   const urlsArray = Object.keys(userURLs).map(shortURL => {
     return {
@@ -131,6 +102,7 @@ app.get("/urls", (req, res) => {
     urls: urlsArray,
     user: users[req.session["user_id"]]
   };
+  
   res.render("urls_index", templateVars);
 });
 
@@ -146,6 +118,7 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[userID]
   };
+
   res.render("urls_new", templateVars);
 });
 
@@ -173,6 +146,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: url.longURL,
     user: users[userID]
   };
+
   res.render("urls_show", templateVars);
 });
 
@@ -182,9 +156,11 @@ app.get("/register", (req, res) => {
   if (req.session.user_id && users[req.session.user_id]) {
     res.redirect("/urls");
   }
+
   const templateVars = {
     user: req.user
-  }
+  };
+
   res.render("register", templateVars);
 });
 
@@ -194,9 +170,11 @@ app.get("/login", (req, res) => {
   if (req.session.user_id && users[req.session.user_id]) {
     return res.redirect("/urls");
   }
+
   const templateVars = {
     user: req.user
   };
+
   res.render("login", templateVars);
 });
 
@@ -207,10 +185,12 @@ app.post("/urls", (req, res) => {
     res.status(403).send("You need to be logged in to create new URLs.");
     return;
   }
+
   let generatedID = generateRandomString();
   let longURL = req.body.longURL;
   urlDatabase[generatedID] = { longURL, userID: req.session.user_id };
-  res.redirect(`/urls/${generatedID}`)
+
+  res.redirect(`/urls/${generatedID}`);
 });
 
 

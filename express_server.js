@@ -1,4 +1,4 @@
-const { getUserByEmail, generateRandomString, urlsForUser, } = require("./helpers");
+const { getUserByEmail, generateRandomString, urlsForUser } = require("./helpers");
 const { urlDatabase, users } = require("./database");
 
 const express = require("express");
@@ -41,7 +41,7 @@ app.get("/u/:id", (req, res) => {
       </body>
     </html>
   `);
-  return;
+    return;
   }
 
   const templateVars = {
@@ -102,7 +102,7 @@ app.get("/urls", (req, res) => {
     urls: urlsArray,
     user: users[req.session["user_id"]]
   };
-  
+
   res.render("urls_index", templateVars);
 });
 
